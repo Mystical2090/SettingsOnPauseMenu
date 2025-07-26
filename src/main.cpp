@@ -20,7 +20,8 @@ class $modify(SettingsOnPauseMenuPleaseWork, PauseLayer) {
     }
     
     void onOptions(CCObject*) {
-        auto options = OptionsLayer::create();
-        options->showLayer(false);
+        auto optionsLayer = OptionsLayer::create();
+        optionsLayer->setZOrder(6969696969); // ZOrder because it need to be above everything
+        optionsLayer->showLayer(false);
     }
 };
