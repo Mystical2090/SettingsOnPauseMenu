@@ -1,0 +1,14 @@
+{
+    "geode": "4.7.0",
+    "gd": {
+        "mac": "2.2074",
+        "win": "2.2074",
+        "ios": "2.2074",
+        "android": "2.2074"
+    },
+    "version": "v1.0.0",
+    "id": "mystical433.settingsonpausemenu",
+    "name": "Settings On Pause Menu",
+    "developer": "Mystical433",
+    "description": "The name explains it."
+}
