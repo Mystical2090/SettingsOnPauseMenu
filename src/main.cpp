@@ -1,6 +1,5 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/PauseLayer.hpp>
-#include <Geode/ui/CCMenuItemSpriteExtra.hpp>
 
 using namespace geode::prelude;
 
@@ -9,15 +8,15 @@ class $modify(SettingsOnPauseMenuPleaseWork, PauseLayer) {
         PauseLayer::customSetup();
 
         auto sprite = CCSprite::createWithSpriteFrameName("GJ_optionsBtn02_001.png");
-        sprite->setScale(0.775f);
+        sprite->setScale(0.79f);
 
         auto button = CCMenuItemSpriteExtra::create(
             sprite, this, menu_selector(SettingsOnPauseMenuPleaseWork::onOptions)
         );
         button->setID("main-options"_spr);
 
-        if (auto rightButtonMenu = this->getChildByID("right-button-menu")) {
-            if (auto menu = typeinfo_cast<CCMenu*>(rightButtonMenu)) {
+        if (auto leftButtonMenu = this->getChildByID("left-button-menu")) {
+            if (auto menu = typeinfo_cast<CCMenu*>(leftButtonMenu)) {
                 menu->addChild(button);
                 menu->updateLayout();
             }
