@@ -24,6 +24,6 @@ class $modify(SettingsOnPauseMenuPleaseWork, PauseLayer) {
     }
 
     void onOptions(CCObject*) {
-        PauseLayer::showOptions();
+        this->showOptions();
     }
 };
