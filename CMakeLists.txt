@@ -10,11 +10,11 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 project(SettingPauseMenuPleaseWork VERSION 1.0.0)
 
-file(GLOB_RECURSE SOURCES (
+file(GLOB_RECURSE SOURCES
     "src/*.cpp"
 		"src/*/*.cpp"
 		"src/*/*/*.cpp"
-		"src/*/*/*/*.cpp
+		"src/*/*/*/*.cpp"
 )
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
