@@ -3,8 +3,7 @@
 
 SearchPopup* SearchPopup::create(SearchCB callback) {
     auto ret = new SearchPopup();
-    if (ret && ret->initAnchored(320.f, 200.f, callback)) {
-        ret->autorelease();
+    if (ret && ret->initAnchored(280.f, 160.f, callback)) {
         return ret;
     }
     delete ret;
@@ -59,7 +58,7 @@ bool SearchPopup::setup(SearchCB callback) {
     buttonMenu->setID("action-buttons");
 
     auto searchBtn = CCMenuItemSpriteExtra::create(
-        ButtonSprite::create("Search", "bigFont.fnt", "GJ_button_01.png", 0.8f),
+        ButtonSprite::create("Search", "chatFont.fnt", "GJ_button_01.png", 0.8f),
         this, 
         menu_selector(SearchPopup::onSearch)
     );
@@ -116,7 +115,7 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
 
     auto nameLabel = CCLabelBMFont::create(name.c_str(), "bigFont.fnt");
     nameLabel->setID("name-label");
-    nameLabel->limitLabelWidth(300.f, 0.7f, 0.4f);
+    nameLabel->limitLabelWidth(250.f, 0.6f, 0.3f);
     nameLabel->setColor({255, 255, 255});
     
     auto menu = CCMenu::create();
@@ -165,7 +164,7 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
         }
         case FMODDebug: {
             auto debugBtn = CCMenuItemSpriteExtra::create(
-                ButtonSprite::create("Debug", "bigFont.fnt", "GJ_button_04.png", 0.6f),
+                ButtonSprite::create("Debug", "chatFont.fnt", "GJ_button_04.png", 0.6f),
                 this, 
                 menu_selector(SettingCell::onFMODDebug)
             );
@@ -356,7 +355,7 @@ void SettingCell::onInfo(CCObject* sender) {
 
 SettingsLayer* SettingsLayer::create() {
     auto ret = new SettingsLayer();
-    if (ret && ret->initAnchored(720.f, 450.f)) {
+    if (ret && ret->initAnchored(600.f, 380.f)) {
         ret->autorelease();
         return ret;
     }
@@ -422,7 +421,7 @@ bool SettingsLayer::setup() {
 
     auto tabBg = CCScale9Sprite::create("GJ_square01.png");
     tabBg->setID("tab-background");
-    tabBg->setContentSize({160.f, 380.f});
+    tabBg->setContentSize({140.f, 320.f});
     tabBg->setColor({255, 255, 255});
     tabBg->setOpacity(150);
 
@@ -445,11 +444,11 @@ bool SettingsLayer::setup() {
             ->setAxisAlignment(AxisAlignment::Even)
             ->setGap(10.f)
     );
-    tabMenu->setContentSize({140.f, 360.f});
+    tabMenu->setContentSize({120.f, 300.f});
     tabMenu->updateLayout();
     tabBg->addChildAtPosition(tabMenu, Anchor::Center);
 
-    m_mainLayer->addChildAtPosition(tabBg, Anchor::Left, {110.f, 0.f});
+    m_mainLayer->addChildAtPosition(tabBg, Anchor::Left, {90.f, 0.f});
 
     switchPage(SettingPage::Gameplay, true, 
         static_cast<CCMenuItemSpriteExtra*>(this->getChildByIDRecursive("Gameplay")));
