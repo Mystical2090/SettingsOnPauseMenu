@@ -1,4 +1,4 @@
-#include "./SettingsLayer.hpp"
+#include "ui.hpp"
 #include <unordered_set>
 
 SearchPopup* SearchPopup::create(SearchCB callback) {
