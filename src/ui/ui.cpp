@@ -1,4 +1,4 @@
-#include "ui.hpp"
+#include "./SettingsLayer.hpp"
 
 SearchPopup* SearchPopup::create(SearchCB callback) {
     auto ret = new SearchPopup();
@@ -96,12 +96,13 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
             menu->addChild(m_toggler);
             break;
         case FMODDebug:
-            spr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn02_001.png");
-            spr->setScale(0.4f);
+            spr = ButtonSprite::create("Debug", "goldFont.fnt", "GJ_button_05.png");
+            spr->setScale(0.5f);
             btn = CCMenuItemSpriteExtra::create(
                 spr, this, menu_selector(SettingCell::onFMODDebug)
             );
-            btn->setID("fmod-debug-button");
+            btn->setID("button");
+            btn->setPositionX(-10.f);
             menu->addChild(btn);
             break;
         case SongSelect:
@@ -319,7 +320,6 @@ bool SettingsLayer::setup() {
     CATEGORY_BTN("Audio", SettingPage::Audio)
     CATEGORY_BTN("Misc", SettingPage::Misc)
     CATEGORY_BTN("Keys", SettingPage::Keybinds)
-    CATEGORY_BTN("Credits", SettingPage::Credits)
 
     menu->setLayout(
         ColumnLayout::create()
@@ -524,17 +524,14 @@ void SettingsLayer::switchPage(SettingPage page, bool isFirstRun, CCMenuItemSpri
             SETTING("Practice Death Effect", "0100")
             SETTING("Hide Attempts in Practice", "0134")
             break;
-        case Credits:
-            SETTING("Mystical433", "999999")
-            SETTING("SpeedyFriend67", "99999999999")
-            break;
         case Keybinds:
             #ifndef GEODE_IS_IOS
+// this should work but like for ios you dont need keybinds so
             auto mol = MoreOptionsLayer::create();
             mol->onKeybindings(btn);
 	    #endif
 
-            SEPARATOR("Soon")
+            SEPARATOR("Nothing Here For you.")
 
             break;
     }
