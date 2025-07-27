@@ -528,6 +528,7 @@ void SettingsLayer::switchPage(SettingPage page, bool isFirstRun, CCMenuItemSpri
             break;
 	 case Credits:
 	   SETTING("Mystical433", "99999")
+	   break;
         case Keybinds:
             #ifndef GEODE_IS_IOS
 // this should work but like for ios you dont need keybinds so
@@ -535,7 +536,7 @@ void SettingsLayer::switchPage(SettingPage page, bool isFirstRun, CCMenuItemSpri
             mol->onKeybindings(btn);
 	    #endif
 
-            SEPARATOR("Nothing Here For you.")
+            SEPARATOR("For iOS and Android, we dont need this page.")
 
             break;
     }
