@@ -51,7 +51,6 @@ bool SearchPopup::setup(SearchCB callback) {
     m_input = TextInput::create(230.f, "Type to search...");
     m_input->setID("search-input");
     m_input->setMaxCharCount(64);
-    m_input->getInputNode()->setColor({50, 50, 50});
     inputContainer->addChild(m_input);
     
     m_mainLayer->addChildAtPosition(inputContainer, Anchor::Center, {0, 15.f});
@@ -195,7 +194,6 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
             offsetInput->setMaxCharCount(6);
             offsetInput->setID("offset-input");
             offsetInput->setScale(0.8f);
-            offsetInput->getInputNode()->setColor({50, 50, 50});
 
             if (gameManager->m_timeOffset != 0) {
                 offsetInput->setString(fmt::format("{}", gameManager->m_timeOffset));
@@ -366,7 +364,7 @@ SettingsLayer* SettingsLayer::create() {
     return nullptr;
 }
 
-CCSprite* createModernCategorySprite(const std::string& name, bool isSelected = false) {
+CCMenuItemSpriteExtra* createModernCategorySprite(const std::string& name, bool isSelected = false) {
     auto sprite = CCScale9Sprite::create(
         isSelected ? "GJ_button_01.png" : "GJ_button_04.png"
     );
@@ -378,13 +376,19 @@ CCSprite* createModernCategorySprite(const std::string& name, bool isSelected = 
     
     sprite->addChildAtPosition(text, Anchor::Center);
     
-    return sprite;
+    return CCMenuItemSpriteExtra::create(sprite, nullptr, nullptr);
 }
 
 CCMenuItemSpriteExtra* createModernCategoryBtn(const std::string& name, CCObject* target, SettingPage page, SEL_MenuHandler callback) {
-    auto btn = CCMenuItemSpriteExtra::create(
-        createModernCategorySprite(name), target, callback
-    );
+    auto sprite = CCScale9Sprite::create("GJ_button_04.png");
+    sprite->setContentSize({140.f, 40.f});
+    
+    auto text = CCLabelBMFont::create(name.c_str(), "bigFont.fnt");
+    text->limitLabelWidth(120.f, 0.7f, 0.1f);
+    text->setColor(ccc3(200, 200, 200));
+    sprite->addChildAtPosition(text, Anchor::Center);
+    
+    auto btn = CCMenuItemSpriteExtra::create(sprite, target, callback);
     btn->setUserObject(CCInteger::create(page));
     btn->setID(name);
     return btn;
@@ -694,10 +698,22 @@ void SettingsLayer::switchPage(SettingPage page, bool isFirstRun, CCMenuItemSpri
     refreshList();
     
     if (m_currentBtn) {
-        m_currentBtn->setSprite(createModernCategorySprite(m_currentBtn->getID(), false));
+        auto sprite = CCScale9Sprite::create("GJ_button_04.png");
+        sprite->setContentSize({140.f, 40.f});
+        auto text = CCLabelBMFont::create(m_currentBtn->getID().c_str(), "bigFont.fnt");
+        text->limitLabelWidth(120.f, 0.7f, 0.1f);
+        text->setColor(ccc3(200, 200, 200));
+        sprite->addChildAtPosition(text, Anchor::Center);
+        m_currentBtn->setSprite(sprite);
     }
     if (btn) {
-        btn->setSprite(createModernCategorySprite(btn->getID(), true));
+        auto sprite = CCScale9Sprite::create("GJ_button_01.png");
+        sprite->setContentSize({140.f, 40.f});
+        auto text = CCLabelBMFont::create(btn->getID().c_str(), "bigFont.fnt");
+        text->limitLabelWidth(120.f, 0.7f, 0.1f);
+        text->setColor(ccc3(255, 255, 255));
+        sprite->addChildAtPosition(text, Anchor::Center);
+        btn->setSprite(sprite);
         m_currentBtn = btn;
     }
 }
@@ -718,15 +734,20 @@ void SettingsLayer::refreshList() {
     listBg->setColor({255, 255, 255});
     listBg->setOpacity(140);
     
-    m_border = CCNode::create();
-    m_border->setID("list-container");
-    m_border->addChild(listBg);
-    m_border->addChild(listView);
-    m_border->setContentSize({520.f, 360.f});
+    auto container = CCNode::create();
+    container->setID("list-container");
+    container->addChild(listBg);
+    container->addChild(listView);
+    container->setContentSize({520.f, 360.f});
     
     listView->setPosition({260.f, 180.f});
     listBg->setPosition({260.f, 180.f});
     
+    if (m_border) {
+        m_border->removeFromParent();
+    }
+    
+    m_border = container;
     m_border->ignoreAnchorPointForPosition(false);
     m_mainLayer->addChildAtPosition(m_border, Anchor::Right, {-180.f, 0.f});
 }
