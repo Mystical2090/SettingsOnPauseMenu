@@ -10,7 +10,8 @@ enum SettingPage {
     Performance,
     Audio,
     Misc,
-    Keybinds
+    Keybinds,
+    Credits
 };
 
 enum SettingCellType {
