@@ -164,7 +164,7 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
             auto separatorText = CCLabelBMFont::create(name.c_str(), "goldFont.fnt");
             separatorText->setID("separator-label");
             separatorText->limitLabelWidth(320.f, 0.8f, 0.1f);
-            separatorText->setColor({255, 215, 0}); // Gold color
+            separatorText->setColor({255, 215, 0});
             this->addChildAtPosition(separatorText, Anchor::Center);
             break;
         }
@@ -200,12 +200,12 @@ void SettingCell::onCheckboxToggled(CCObject* sender) {
     GameManager::get()->setGameVariable(m_gameVariable.c_str(), newValue);
     log::debug("Setting gv_{} to {}", m_gameVariable, newValue);
 
-    auto particle = CCParticleSystemQuad::create("explodeEffect.plist");
-    if (particle) {
-        particle->setPosition(m_toggler->getPosition());
-        particle->setScale(0.3f);
-        particle->setAutoRemoveOnFinish(true);
-        this->addChild(particle);
+    if (m_toggler) {
+        m_toggler->stopAllActions();
+        auto scaleUp = CCScaleTo::create(0.1f, 0.9f);
+        auto scaleDown = CCScaleTo::create(0.1f, 0.75f);
+        auto sequence = CCSequence::create(scaleUp, scaleDown, nullptr);
+        m_toggler->runAction(sequence);
     }
 }
 
@@ -326,6 +326,7 @@ bool SettingsLayer::setup() {
 
     auto tabMenu = CCMenu::create();
     tabMenu->setID("tab-menu");
+
     #define CATEGORY_BTN(name, page) tabMenu->addChild( \
         createCategoryBtn(name, this, page, menu_selector(SettingsLayer::onCategoryBtn)) \
     );
@@ -403,10 +404,9 @@ void SettingsLayer::performSearch(std::string query) {
     auto currentPage = static_cast<SettingPage>(
         static_cast<CCInteger*>(m_currentBtn->getUserObject())->getValue()
     );
-
-    auto allSettings = CCArray::create();
     
-    // Temporarily switch to each page to collect all settings
+    auto allSettings = CCArray::create();
+
     for (int i = 0; i < 6; i++) {
         switchPage(static_cast<SettingPage>(i), false, m_currentBtn);
         for (auto cell : CCArrayExt<SettingCell*>(m_listItems)) {
@@ -493,6 +493,7 @@ void SettingsLayer::switchPage(SettingPage page, bool isFirstRun, CCMenuItemSpri
             SETTING("Switch Dash Fire Color", "0062")
             SETTING("Switch Wave Trail Color", "0096")
             break;
+
         
         case Audio:
             SEPARATOR("Audio Quality")
@@ -511,7 +512,7 @@ void SettingsLayer::switchPage(SettingPage page, bool isFirstRun, CCMenuItemSpri
             SETTING_WITH_TYPE("Local Songs", SettingCellType::SongSelect)
             SETTING_WITH_TYPE("Song Offset (MS)", SettingCellType::SongOffset)
             break;
-
+            
         default:
             SEPARATOR("Coming Soon!")
             break;
@@ -522,7 +523,7 @@ void SettingsLayer::switchPage(SettingPage page, bool isFirstRun, CCMenuItemSpri
     }
     
     refreshList();
-
+    
     if (m_currentBtn) {
         m_currentBtn->setSprite(createCategoryBtnSprite(m_currentBtn->getID(), false));
     }
@@ -538,7 +539,6 @@ void SettingsLayer::refreshList() {
     
     m_border = Border::create(listView, {30, 30, 35, 200}, {380.f, 260.f});
     m_border->setID("list-border");
-   
     if (auto borderSprite = typeinfo_cast<CCScale9Sprite*>(
         m_border->getChildByID("geode.loader/border_sprite"))) {
         borderSprite->setColor({40, 40, 50});
