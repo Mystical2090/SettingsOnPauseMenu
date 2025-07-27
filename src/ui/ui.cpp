@@ -365,10 +365,10 @@ SettingsLayer* SettingsLayer::create() {
 }
 
 CCMenuItemSpriteExtra* createModernCategorySprite(const std::string& name, bool isSelected = false) {
-    auto sprite = CCScale9Sprite::create(
+    auto sprite = CCSprite::create(
         isSelected ? "GJ_button_01.png" : "GJ_button_04.png"
     );
-    sprite->setContentSize({140.f, 40.f});
+    sprite->setScale(1.1f);
     
     auto text = CCLabelBMFont::create(name.c_str(), "bigFont.fnt");
     text->limitLabelWidth(120.f, 0.7f, 0.1f);
@@ -380,8 +380,8 @@ CCMenuItemSpriteExtra* createModernCategorySprite(const std::string& name, bool 
 }
 
 CCMenuItemSpriteExtra* createModernCategoryBtn(const std::string& name, CCObject* target, SettingPage page, SEL_MenuHandler callback) {
-    auto sprite = CCScale9Sprite::create("GJ_button_04.png");
-    sprite->setContentSize({140.f, 40.f});
+    auto sprite = CCSprite::create("GJ_button_04.png");
+    sprite->setScale(1.1f);
     
     auto text = CCLabelBMFont::create(name.c_str(), "bigFont.fnt");
     text->limitLabelWidth(120.f, 0.7f, 0.1f);
@@ -698,8 +698,8 @@ void SettingsLayer::switchPage(SettingPage page, bool isFirstRun, CCMenuItemSpri
     refreshList();
     
     if (m_currentBtn) {
-        auto sprite = CCScale9Sprite::create("GJ_button_04.png");
-        sprite->setContentSize({140.f, 40.f});
+        auto sprite = CCSprite::create("GJ_button_04.png");
+        sprite->setScale(1.1f);
         auto text = CCLabelBMFont::create(m_currentBtn->getID().c_str(), "bigFont.fnt");
         text->limitLabelWidth(120.f, 0.7f, 0.1f);
         text->setColor(ccc3(200, 200, 200));
@@ -707,8 +707,8 @@ void SettingsLayer::switchPage(SettingPage page, bool isFirstRun, CCMenuItemSpri
         m_currentBtn->setSprite(sprite);
     }
     if (btn) {
-        auto sprite = CCScale9Sprite::create("GJ_button_01.png");
-        sprite->setContentSize({140.f, 40.f});
+        auto sprite = CCSprite::create("GJ_button_01.png");
+        sprite->setScale(1.1f);
         auto text = CCLabelBMFont::create(btn->getID().c_str(), "bigFont.fnt");
         text->limitLabelWidth(120.f, 0.7f, 0.1f);
         text->setColor(ccc3(255, 255, 255));
