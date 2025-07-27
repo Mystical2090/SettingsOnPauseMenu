@@ -3,7 +3,7 @@
 
 SearchPopup* SearchPopup::create(SearchCB callback) {
     auto ret = new SearchPopup();
-    if (ret && ret->initAnchored(300.f, 180.f, callback)) {
+    if (ret && ret->initAnchored(320.f, 200.f, callback)) {
         ret->autorelease();
         return ret;
     }
@@ -19,45 +19,55 @@ bool SearchPopup::setup(SearchCB callback) {
     
     if (m_bgSprite) {
         m_bgSprite->setID("background");
-        m_bgSprite->setColor({25, 30, 40});
+        auto gradient = CCLayerGradient::create(ccc4(40, 125, 255, 255), ccc4(15, 75, 200, 255));
+        gradient->setContentSize(m_bgSprite->getContentSize());
+        gradient->setPosition(m_bgSprite->getPosition());
+        gradient->setZOrder(-1);
+        this->addChild(gradient);
     }
+    
     if (m_title) {
         m_title->setID("title");
-        m_title->setColor({220, 240, 255});
-        m_title->setScale(1.1f);
+        m_title->setColor({255, 255, 255});
+        m_title->setScale(0.9f);
     }
+    
     if (m_buttonMenu) m_buttonMenu->setID("button-menu");
     if (m_mainLayer) m_mainLayer->setID("main-layer");
-    if (m_closeBtn) m_closeBtn->setID("close-button");
+    if (m_closeBtn) {
+        m_closeBtn->setID("close-button");
+        m_closeBtn->setScale(0.8f);
+    }
 
     auto inputContainer = CCNode::create();
     inputContainer->setID("input-container");
     
-    auto inputBg = CCScale9Sprite::create("square02_small.png");
-    inputBg->setContentSize({220.f, 40.f});
-    inputBg->setColor({45, 55, 70});
-    inputBg->setOpacity(180);
+    auto inputBg = CCScale9Sprite::create("GJ_square01.png");
+    inputBg->setContentSize({240.f, 35.f});
+    inputBg->setColor({255, 255, 255});
+    inputBg->setOpacity(220);
     inputContainer->addChild(inputBg);
 
-    m_input = TextInput::create(210.f, "Type to search...");
+    m_input = TextInput::create(230.f, "Type to search...");
     m_input->setID("search-input");
     m_input->setMaxCharCount(64);
+    m_input->getInputNode()->setColor({50, 50, 50});
     inputContainer->addChild(m_input);
     
-    m_mainLayer->addChildAtPosition(inputContainer, Anchor::Center, {0, 20.f});
+    m_mainLayer->addChildAtPosition(inputContainer, Anchor::Center, {0, 15.f});
 
     auto buttonMenu = CCMenu::create();
     buttonMenu->setID("action-buttons");
 
     auto searchBtn = CCMenuItemSpriteExtra::create(
-        ButtonSprite::create("Search", "goldFont.fnt", "GJ_button_01.png", 0.9f),
+        ButtonSprite::create("Search", "bigFont.fnt", "GJ_button_01.png", 0.8f),
         this, 
         menu_selector(SearchPopup::onSearch)
     );
     searchBtn->setID("search-button");
 
     auto clearBtn = CCMenuItemSpriteExtra::create(
-        ButtonSprite::create("Clear", "goldFont.fnt", "GJ_button_02.png", 0.9f),
+        ButtonSprite::create("Clear", "bigFont.fnt", "GJ_button_06.png", 0.8f),
         this, 
         menu_selector(SearchPopup::onClear)
     );
@@ -65,10 +75,10 @@ bool SearchPopup::setup(SearchCB callback) {
 
     buttonMenu->addChild(searchBtn);
     buttonMenu->addChild(clearBtn);
-    buttonMenu->setLayout(RowLayout::create()->setGap(15.f));
+    buttonMenu->setLayout(RowLayout::create()->setGap(20.f));
     buttonMenu->updateLayout();
     
-    m_mainLayer->addChildAtPosition(buttonMenu, Anchor::Center, {0, -25.f});
+    m_mainLayer->addChildAtPosition(buttonMenu, Anchor::Center, {0, -35.f});
 
     return true;
 }
@@ -107,8 +117,8 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
 
     auto nameLabel = CCLabelBMFont::create(name.c_str(), "bigFont.fnt");
     nameLabel->setID("name-label");
-    nameLabel->limitLabelWidth(320.f, 0.85f, 0.5f);
-    nameLabel->setColor({230, 235, 245});
+    nameLabel->limitLabelWidth(300.f, 0.7f, 0.4f);
+    nameLabel->setColor({255, 255, 255});
     
     auto menu = CCMenu::create();
     menu->setID("button-menu");
@@ -117,33 +127,32 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
 
     switch (type) {
         case Separator: {
-            auto separatorBg = CCScale9Sprite::create("square02b_001.png");
-            separatorBg->setContentSize({480.f, 32.f});
-            separatorBg->setColor({20, 25, 35});
-            separatorBg->setOpacity(120);
+            auto separatorBg = CCScale9Sprite::create("GJ_square05.png");
+            separatorBg->setContentSize({480.f, 35.f});
+            separatorBg->setColor({100, 150, 255});
+            separatorBg->setOpacity(180);
             this->addChild(separatorBg);
             
             auto separatorText = CCLabelBMFont::create(name.c_str(), "goldFont.fnt");
             separatorText->setID("separator-label");
-            separatorText->limitLabelWidth(440.f, 0.9f, 0.1f);
-            separatorText->setColor({255, 215, 100});
+            separatorText->limitLabelWidth(420.f, 0.8f, 0.1f);
+            separatorText->setColor({255, 255, 255});
             this->addChildAtPosition(separatorText, Anchor::Center);
             
-            this->setContentSize({480.f, 32.f});
+            this->setContentSize({480.f, 35.f});
             return true;
         }
         case Default: {
             m_toggler = CCMenuItemToggler::createWithStandardSprites(
                 this,
                 menu_selector(SettingCell::onCheckboxToggled),
-                0.8f
+                0.7f
             );
             m_toggler->setID("toggler");
             m_toggler->toggle(gameManager->getGameVariable(gv.c_str()));
 
             auto infoSpr = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
-            infoSpr->setScale(0.7f);
-            infoSpr->setColor({180, 220, 255});
+            infoSpr->setScale(0.6f);
             auto infoBtn = CCMenuItemSpriteExtra::create(
                 infoSpr, this, menu_selector(SettingCell::onInfo)
             );
@@ -151,13 +160,13 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
             
             menu->addChild(infoBtn);
             menu->addChild(m_toggler);
-            menu->setLayout(RowLayout::create()->setGap(15.f)->setAxisAlignment(AxisAlignment::End));
+            menu->setLayout(RowLayout::create()->setGap(12.f)->setAxisAlignment(AxisAlignment::End));
             menu->updateLayout();
             break;
         }
         case FMODDebug: {
             auto debugBtn = CCMenuItemSpriteExtra::create(
-                ButtonSprite::create("Debug", "goldFont.fnt", "GJ_button_05.png", 0.7f),
+                ButtonSprite::create("Debug", "bigFont.fnt", "GJ_button_04.png", 0.6f),
                 this, 
                 menu_selector(SettingCell::onFMODDebug)
             );
@@ -166,9 +175,8 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
             break;
         }
         case SongSelect: {
-            auto songSpr = CCSprite::createWithSpriteFrameName("GJ_savedSongsBtn_001.png");
-            songSpr->setScale(0.6f);
-            songSpr->setColor({150, 255, 150});
+            auto songSpr = CCSprite::createWithSpriteFrameName("GJ_audioOnBtn_001.png");
+            songSpr->setScale(0.7f);
             auto songBtn = CCMenuItemSpriteExtra::create(
                 songSpr, this, menu_selector(SettingCell::onSongSelect)
             );
@@ -177,16 +185,17 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
             break;
         }
         case SongOffset: {
-            auto offsetBg = CCScale9Sprite::create("square02_small.png");
-            offsetBg->setContentSize({90.f, 28.f});
-            offsetBg->setColor({60, 70, 85});
-            offsetBg->setOpacity(150);
+            auto offsetBg = CCScale9Sprite::create("GJ_square01.png");
+            offsetBg->setContentSize({80.f, 30.f});
+            offsetBg->setColor({255, 255, 255});
+            offsetBg->setOpacity(200);
             
-            auto offsetInput = TextInput::create(85.f, "0");
+            auto offsetInput = TextInput::create(75.f, "0");
             offsetInput->setCommonFilter(CommonFilter::Int);
             offsetInput->setMaxCharCount(6);
             offsetInput->setID("offset-input");
-            offsetInput->setScale(0.85f);
+            offsetInput->setScale(0.8f);
+            offsetInput->getInputNode()->setColor({50, 50, 50});
 
             if (gameManager->m_timeOffset != 0) {
                 offsetInput->setString(fmt::format("{}", gameManager->m_timeOffset));
@@ -211,16 +220,16 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
     }
 
     if (type != Separator) {
-        auto cellBg = CCScale9Sprite::create("square02b_small.png");
-        cellBg->setContentSize({480.f, 40.f});
-        cellBg->setColor({35, 40, 50});
-        cellBg->setOpacity(100);
+        auto cellBg = CCScale9Sprite::create("GJ_square02.png");
+        cellBg->setContentSize({480.f, 45.f});
+        cellBg->setColor({255, 255, 255});
+        cellBg->setOpacity(120);
         this->addChild(cellBg);
         
-        this->addChildAtPosition(nameLabel, Anchor::Left, {25.f, 0.f});
-        this->addChildAtPosition(menu, Anchor::Right, {-25.f, 0.f});
+        this->addChildAtPosition(nameLabel, Anchor::Left, {20.f, 0.f});
+        this->addChildAtPosition(menu, Anchor::Right, {-20.f, 0.f});
         nameLabel->setAnchorPoint({0.f, 0.5f});
-        this->setContentSize({480.f, 40.f});
+        this->setContentSize({480.f, 45.f});
     }
 
     return true;
@@ -248,15 +257,8 @@ void SettingCell::onCheckboxToggled(CCObject* sender) {
     
     if (m_toggler) {
         m_toggler->stopAllActions();
-        auto bounce = CCEaseElasticOut::create(CCScaleTo::create(0.3f, 0.8f));
-        auto fadeOut = CCFadeTo::create(0.1f, 180);
-        auto fadeIn = CCFadeTo::create(0.15f, 255);
-        auto fadeSeq = CCSequence::create(fadeOut, fadeIn, nullptr);
-        
+        auto bounce = CCEaseElasticOut::create(CCScaleTo::create(0.25f, 0.7f));
         m_toggler->runAction(bounce);
-        if (auto parent = this->getParent()) {
-            parent->runAction(fadeSeq);
-        }
     }
 }
 
@@ -356,7 +358,7 @@ void SettingCell::onInfo(CCObject* sender) {
 
 SettingsLayer* SettingsLayer::create() {
     auto ret = new SettingsLayer();
-    if (ret && ret->initAnchored(680.f, 420.f)) {
+    if (ret && ret->initAnchored(720.f, 450.f)) {
         ret->autorelease();
         return ret;
     }
@@ -365,22 +367,16 @@ SettingsLayer* SettingsLayer::create() {
 }
 
 CCSprite* createModernCategorySprite(const std::string& name, bool isSelected = false) {
-    auto sprite = CCSprite::createWithSpriteFrameName(
-        isSelected ? "GJ_longBtn02_001.png" : "GJ_longBtn01_001.png"
+    auto sprite = CCScale9Sprite::create(
+        isSelected ? "GJ_button_01.png" : "GJ_button_04.png"
     );
-    
-    if (isSelected) {
-        sprite->setColor({100, 150, 255});
-    } else {
-        sprite->setColor({80, 90, 110});
-    }
+    sprite->setContentSize({140.f, 40.f});
     
     auto text = CCLabelBMFont::create(name.c_str(), "bigFont.fnt");
-    text->limitLabelWidth(120.f, 0.8f, 0.1f);
-    text->setColor(isSelected ? ccc3(255, 255, 255) : ccc3(200, 210, 230));
+    text->limitLabelWidth(120.f, 0.7f, 0.1f);
+    text->setColor(isSelected ? ccc3(255, 255, 255) : ccc3(200, 200, 200));
     
-    sprite->setScale(1.1f);
-    sprite->addChildAtPosition(text, Anchor::Center, {0, 2.f});
+    sprite->addChildAtPosition(text, Anchor::Center);
     
     return sprite;
 }
@@ -391,33 +387,40 @@ CCMenuItemSpriteExtra* createModernCategoryBtn(const std::string& name, CCObject
     );
     btn->setUserObject(CCInteger::create(page));
     btn->setID(name);
-    btn->setContentSize({130.f, 45.f});
     return btn;
 }
 
 bool SettingsLayer::setup() {
     this->setID("SettingsLayer"_spr);
-    this->setTitle("Advanced Settings Panel");
+    this->setTitle("Advanced Settings");
     
     if (m_bgSprite) {
         m_bgSprite->setID("background");
-        m_bgSprite->setColor({20, 25, 35});
+        auto gradient = CCLayerGradient::create(ccc4(0, 100, 255, 255), ccc4(0, 50, 150, 255));
+        gradient->setContentSize(m_bgSprite->getContentSize());
+        gradient->setPosition(m_bgSprite->getPosition());
+        gradient->setZOrder(-1);
+        this->addChild(gradient);
     }
+    
     if (m_buttonMenu) m_buttonMenu->setID("button-menu");
     if (m_mainLayer) m_mainLayer->setID("main-layer");
-    if (m_closeBtn) m_closeBtn->setID("close-button");
+    if (m_closeBtn) {
+        m_closeBtn->setID("close-button");
+        m_closeBtn->setScale(0.8f);
+    }
     if (m_title) {
-        m_title->setColor({220, 230, 255});
-        m_title->setScale(1.1f);
+        m_title->setColor({255, 255, 255});
+        m_title->setScale(1.0f);
     }
     
     m_noElasticity = true;
 
-    auto tabBg = CCScale9Sprite::create("square02b_001.png");
+    auto tabBg = CCScale9Sprite::create("GJ_square01.png");
     tabBg->setID("tab-background");
-    tabBg->setContentSize({160.f, 360.f});
-    tabBg->setColor({15, 20, 30});
-    tabBg->setOpacity(200);
+    tabBg->setContentSize({160.f, 380.f});
+    tabBg->setColor({255, 255, 255});
+    tabBg->setOpacity(150);
 
     auto tabMenu = CCMenu::create();
     tabMenu->setID("tab-menu");
@@ -436,13 +439,13 @@ bool SettingsLayer::setup() {
     tabMenu->setLayout(
         ColumnLayout::create()
             ->setAxisAlignment(AxisAlignment::Even)
-            ->setGap(15.f)
+            ->setGap(10.f)
     );
-    tabMenu->setContentSize({140.f, 340.f});
+    tabMenu->setContentSize({140.f, 360.f});
     tabMenu->updateLayout();
     tabBg->addChildAtPosition(tabMenu, Anchor::Center);
 
-    m_mainLayer->addChildAtPosition(tabBg, Anchor::Left, {100.f, 0.f});
+    m_mainLayer->addChildAtPosition(tabBg, Anchor::Left, {110.f, 0.f});
 
     switchPage(SettingPage::Gameplay, true, 
         static_cast<CCMenuItemSpriteExtra*>(this->getChildByIDRecursive("Gameplay")));
@@ -450,23 +453,15 @@ bool SettingsLayer::setup() {
     auto searchContainer = CCNode::create();
     searchContainer->setID("search-container");
     
-    auto searchBg = CCScale9Sprite::create("square02_small.png");
-    searchBg->setContentSize({100.f, 35.f});
-    searchBg->setColor({40, 50, 65});
-    searchBg->setOpacity(150);
-    searchContainer->addChild(searchBg);
-
     auto searchBtnSpr = CCSprite::createWithSpriteFrameName("gj_findBtn_001.png");
-    searchBtnSpr->setScale(0.85f);
-    searchBtnSpr->setColor({150, 200, 255});
+    searchBtnSpr->setScale(0.9f);
     auto searchBtn = CCMenuItemSpriteExtra::create(
         searchBtnSpr, this, menu_selector(SettingsLayer::onSearchBtn)
     );
     searchBtn->setID("search-button");
 
     auto clearBtnSpr = CCSprite::createWithSpriteFrameName("gj_findBtnOff_001.png");
-    clearBtnSpr->setScale(0.85f);
-    clearBtnSpr->setColor({255, 150, 120});
+    clearBtnSpr->setScale(0.9f);
     m_searchClearBtn = CCMenuItemSpriteExtra::create(
         clearBtnSpr, this, menu_selector(SettingsLayer::onClearSearch)
     );
@@ -476,11 +471,11 @@ bool SettingsLayer::setup() {
     auto searchMenu = CCMenu::create();
     searchMenu->addChild(searchBtn);
     searchMenu->addChild(m_searchClearBtn);
-    searchMenu->setLayout(RowLayout::create()->setGap(8.f));
+    searchMenu->setLayout(RowLayout::create()->setGap(10.f));
     searchMenu->updateLayout();
     searchContainer->addChild(searchMenu);
     
-    m_mainLayer->addChildAtPosition(searchContainer, Anchor::TopRight, {-80.f, -30.f});
+    m_mainLayer->addChildAtPosition(searchContainer, Anchor::TopRight, {-90.f, -40.f});
 
     return true;
 }
@@ -708,7 +703,7 @@ void SettingsLayer::switchPage(SettingPage page, bool isFirstRun, CCMenuItemSpri
 }
 
 void SettingsLayer::refreshList() {
-    auto listView = ListView::create(m_listItems, 40.f, 500.f, 340.f);
+    auto listView = ListView::create(m_listItems, 45.f, 520.f, 360.f);
     listView->setID("list-view");
     
     if (listView->m_tableView) {
@@ -718,24 +713,20 @@ void SettingsLayer::refreshList() {
         }
     }
     
-    m_border = Border::create(listView, {25, 30, 40, 220}, {500.f, 340.f});
-    m_border->setID("list-border");
+    auto listBg = CCScale9Sprite::create("GJ_square01.png");
+    listBg->setContentSize({520.f, 360.f});
+    listBg->setColor({255, 255, 255});
+    listBg->setOpacity(140);
     
-    if (auto borderSprite = typeinfo_cast<CCScale9Sprite*>(
-        m_border->getChildByID("geode.loader/border_sprite"))) {
-        borderSprite->setColor({30, 35, 45});
-        borderSprite->setOpacity(180);
-        
-        auto glowEffect = CCScale9Sprite::create("square02_small.png");
-        glowEffect->setContentSize({borderSprite->getContentSize().width + 4.f, 
-                                   borderSprite->getContentSize().height + 4.f});
-        glowEffect->setColor({100, 150, 255});
-        glowEffect->setOpacity(30);
-        glowEffect->setPosition(borderSprite->getPosition());
-        glowEffect->setZOrder(-1);
-        m_border->addChild(glowEffect);
-    }
+    m_border = CCNode::create();
+    m_border->setID("list-container");
+    m_border->addChild(listBg);
+    m_border->addChild(listView);
+    m_border->setContentSize({520.f, 360.f});
+    
+    listView->setPosition({260.f, 180.f});
+    listBg->setPosition({260.f, 180.f});
     
     m_border->ignoreAnchorPointForPosition(false);
-    m_mainLayer->addChildAtPosition(m_border, Anchor::Right, {-170.f, 0.f});
+    m_mainLayer->addChildAtPosition(m_border, Anchor::Right, {-180.f, 0.f});
 }
