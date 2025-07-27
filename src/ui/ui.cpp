@@ -326,7 +326,6 @@ bool SettingsLayer::setup() {
 
     auto tabMenu = CCMenu::create();
     tabMenu->setID("tab-menu");
-
     #define CATEGORY_BTN(name, page) tabMenu->addChild( \
         createCategoryBtn(name, this, page, menu_selector(SettingsLayer::onCategoryBtn)) \
     );
@@ -389,7 +388,7 @@ void SettingsLayer::onClearSearch(CCObject* sender) {
 
 void SettingsLayer::onSearchBtn(CCObject* sender) {
     SearchPopup::create([this](std::string query) {
-        this->performSearch(query);
+        performSearch(query);
     })->show();
 }
 
@@ -406,7 +405,8 @@ void SettingsLayer::performSearch(std::string query) {
     );
 
     auto allSettings = CCArray::create();
- 
+    
+    // Temporarily switch to each page to collect all settings
     for (int i = 0; i < 6; i++) {
         switchPage(static_cast<SettingPage>(i), false, m_currentBtn);
         for (auto cell : CCArrayExt<SettingCell*>(m_listItems)) {
@@ -461,7 +461,6 @@ void SettingsLayer::switchPage(SettingPage page, bool isFirstRun, CCMenuItemSpri
         SettingCell::create(text, "", SettingCellType::Separator) \
     );
 
-    // Populate settings based on selected page
     switch (page) {
         case Gameplay:
             SEPARATOR("Basic Controls")
@@ -539,7 +538,7 @@ void SettingsLayer::refreshList() {
     
     m_border = Border::create(listView, {30, 30, 35, 200}, {380.f, 260.f});
     m_border->setID("list-border");
-
+   
     if (auto borderSprite = typeinfo_cast<CCScale9Sprite*>(
         m_border->getChildByID("geode.loader/border_sprite"))) {
         borderSprite->setColor({40, 40, 50});
