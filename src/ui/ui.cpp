@@ -747,7 +747,7 @@ void SettingsLayer::refreshList() {
         m_border->removeFromParent();
     }
     
-    m_border = container;
+    auto m_border = container;
     m_border->ignoreAnchorPointForPosition(false);
     m_mainLayer->addChildAtPosition(m_border, Anchor::Right, {-180.f, 0.f});
 }
