@@ -7,78 +7,7 @@ SearchPopup* SearchPopup::create(SearchCB callback) {
         return ret;
     }
     delete ret;
-    return nullptr;switch (type) {
-        case Default:
-            m_toggler = CCMenuItemToggler::createWithStandardSprites(
-                this,
-                menu_selector(SettingCell::onCheckboxToggled),
-                0.75f
-            );
-            m_toggler->setID("toggler");
-            m_toggler->toggle(
-                GameManager::get()->getGameVariable(gv.c_str())
-            );
-
-            spr = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
-            spr->setScale(0.65f);
-            btn = CCMenuItemSpriteExtra::create(
-                spr, this, menu_selector(SettingCell::onInfo)
-            );
-            btn->setID("info-button");
-            btn->setPositionX(-35.f);
-            
-            menu->addChild(btn);
-            menu->addChild(m_toggler);
-            break;
-        case FMODDebug:
-            spr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn02_001.png");
-            spr->setScale(0.4f);
-            btn = CCMenuItemSpriteExtra::create(
-                spr, this, menu_selector(SettingCell::onFMODDebug)
-            );
-            btn->setID("fmod-debug-button");
-            menu->addChild(btn);
-            break;
-        case SongSelect:
-            spr = CCSprite::createWithSpriteFrameName("GJ_savedSongsBtn_001.png");
-            spr->setScale(0.4f);
-            btn = CCMenuItemSpriteExtra::create(
-                spr, this, menu_selector(SettingCell::onSongSelect)
-            );
-            btn->setID("button");
-            menu->addChild(btn);
-            break;
-        case SongOffset:
-            input = TextInput::create(100.f, "Offset");
-            input->setCommonFilter(CommonFilter::Uint);
-            input->setMaxCharCount(4);
-            input->setID("input");
-
-            if (gameManager->m_timeOffset != 0) {
-                input->setString(fmt::format("{}", gameManager->m_timeOffset));
-            }
-            input->setCallback([this, gameManager](std::string offset) {
-                auto res = geode::utils::numFromString<int>(offset);
-                if(res.isErr()) {
-                    log::info("{}", res.unwrapErr());
-                }
-                gameManager->m_timeOffset = geode::utils::numFromString<int>(offset).unwrapOrDefault();
-            });
-            input->setPositionX(-25.f);
-            input->setScale(0.75f);
-            menu->addChild(input);
-            break;
-        case Separator:
-            nameLabel->setOpacity(0.f);
-            text = CCLabelBMFont::create(
-                name.c_str(),
-                "goldFont.fnt"
-            );
-            text->setID("label");
-            text->limitLabelWidth(300.f, 0.75f, 0.1);
-            this->addChildAtPosition(text, Anchor::Center);
-            break;
-    }
+    return nullptr;
 }
 
 bool SearchPopup::setup(SearchCB callback) {
