@@ -1,7 +1,5 @@
 #pragma once
-
 #include <Geode/Geode.hpp>
-
 using namespace geode::prelude;
 
 enum SettingPage {
@@ -22,12 +20,14 @@ enum SettingCellType {
 };
 
 using SearchCB = std::function<void(std::string)>;
+
 class SearchPopup : public geode::Popup<SearchCB> {
 protected:
     TextInput* m_input;
     SearchCB m_callback;
     bool setup(SearchCB) override;
     void onSearch(CCObject*);
+    void onClear(CCObject*);  // Added this declaration
 public:
     static SearchPopup* create(SearchCB callback);
 };
@@ -35,7 +35,6 @@ public:
 class SettingCell : public CCNode {
 protected:
     CCMenuItemToggler* m_toggler;
-
     bool init(std::string name, std::string gv, SettingCellType type);
     void onCheckboxToggled(CCObject* sender);
     void onFMODDebug(CCObject*);
@@ -54,7 +53,6 @@ protected:
     Border* m_border;
     CCMenuItemSpriteExtra* m_currentBtn;
     CCMenuItemSpriteExtra* m_searchClearBtn;
-
     bool setup() override;
     void createSettingCheckbox(
         std::string name,
@@ -65,6 +63,7 @@ protected:
     void onSearchBtn(CCObject*);
     void onClearSearch(CCObject*);
     void refreshList();
+    void performSearch(std::string query);  // Added this declaration
 public:
     static SettingsLayer* create();
 };
