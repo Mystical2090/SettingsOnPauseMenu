@@ -1,8 +1,9 @@
-#include "ui.hpp"
+#include "./SettingsLayer.hpp"
+#include <unordered_set>
 
 SearchPopup* SearchPopup::create(SearchCB callback) {
     auto ret = new SearchPopup();
-    if (ret && ret->initAnchored(230.f, 140.f, callback)) {
+    if (ret && ret->initAnchored(300.f, 180.f, callback)) {
         ret->autorelease();
         return ret;
     }
@@ -11,40 +12,70 @@ SearchPopup* SearchPopup::create(SearchCB callback) {
 }
 
 bool SearchPopup::setup(SearchCB callback) {
-    m_callback = callback;
+    m_callback = std::move(callback);
+    
     this->setTitle("Search Settings");
     this->setID("SearchPopup"_spr);
-    this->m_bgSprite->setID("background");
-    this->m_title->setID("title");
-    this->m_buttonMenu->setID("button-menu");
-    this->m_mainLayer->setID("main-layer");
-    this->m_closeBtn->setID("close-button");
+    
+    if (m_bgSprite) {
+        m_bgSprite->setID("background");
+        m_bgSprite->setColor({25, 30, 40});
+    }
+    if (m_title) {
+        m_title->setID("title");
+        m_title->setColor({220, 240, 255});
+        m_title->setScale(1.1f);
+    }
+    if (m_buttonMenu) m_buttonMenu->setID("button-menu");
+    if (m_mainLayer) m_mainLayer->setID("main-layer");
+    if (m_closeBtn) m_closeBtn->setID("close-button");
 
-    m_input = TextInput::create(170.f, "Enter search term...");
+    auto inputContainer = CCNode::create();
+    inputContainer->setID("input-container");
+    
+    auto inputBg = CCScale9Sprite::create("square02_small.png");
+    inputBg->setContentSize({220.f, 40.f});
+    inputBg->setColor({45, 55, 70});
+    inputBg->setOpacity(180);
+    inputContainer->addChild(inputBg);
+
+    m_input = TextInput::create(210.f, "Type to search...");
     m_input->setID("search-input");
-    m_input->setMaxCharCount(50);
-    m_mainLayer->addChildAtPosition(m_input, Anchor::Center, {0, 10.f});
+    m_input->setMaxCharCount(64);
+    if (m_input->getInputNode()) {
+        m_input->getInputNode()->setColor({240, 240, 240});
+    }
+    inputContainer->addChild(m_input);
+    
+    m_mainLayer->addChildAtPosition(inputContainer, Anchor::Center, {0, 20.f});
+
+    auto buttonMenu = CCMenu::create();
+    buttonMenu->setID("action-buttons");
 
     auto searchBtn = CCMenuItemSpriteExtra::create(
-        ButtonSprite::create("Search", "goldFont.fnt", "GJ_button_01.png", 0.8f), 
+        ButtonSprite::create("Search", "goldFont.fnt", "GJ_button_01.png", 0.9f),
         this, 
         menu_selector(SearchPopup::onSearch)
     );
     searchBtn->setID("search-button");
-    
+    if (searchBtn->getNormalImage()) {
+        searchBtn->getNormalImage()->setColor({100, 200, 255});
+    }
+
     auto clearBtn = CCMenuItemSpriteExtra::create(
-        ButtonSprite::create("Clear", "goldFont.fnt", "GJ_button_02.png", 0.8f), 
+        ButtonSprite::create("Clear", "goldFont.fnt", "GJ_button_02.png", 0.9f),
         this, 
         menu_selector(SearchPopup::onClear)
     );
     clearBtn->setID("clear-button");
+    if (clearBtn->getNormalImage()) {
+        clearBtn->getNormalImage()->setColor({255, 150, 100});
+    }
 
-    auto buttonMenu = CCMenu::create();
     buttonMenu->addChild(searchBtn);
     buttonMenu->addChild(clearBtn);
-    buttonMenu->setLayout(RowLayout::create()->setGap(10.f));
+    buttonMenu->setLayout(RowLayout::create()->setGap(15.f));
     buttonMenu->updateLayout();
-    buttonMenu->setID("search-buttons");
     
     m_mainLayer->addChildAtPosition(buttonMenu, Anchor::Center, {0, -25.f});
 
@@ -83,9 +114,33 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
     m_gameVariable = gv;
     m_type = type;
 
+    if (type == Separator) {
+        auto separatorBg = CCScale9Sprite::create("square02b_001.png");
+        separatorBg->setContentSize({400.f, 28.f});
+        separatorBg->setColor({20, 25, 35});
+        separatorBg->setOpacity(120);
+        this->addChild(separatorBg);
+        
+        auto separatorText = CCLabelBMFont::create(name.c_str(), "goldFont.fnt");
+        separatorText->setID("separator-label");
+        separatorText->limitLabelWidth(350.f, 0.8f, 0.1f);
+        separatorText->setColor({255, 215, 100});
+        this->addChildAtPosition(separatorText, Anchor::Center);
+        
+        this->setContentSize({400.f, 28.f});
+        return true;
+    }
+
+    auto cellBg = CCScale9Sprite::create("square02b_small.png");
+    cellBg->setContentSize({400.f, 35.f});
+    cellBg->setColor({35, 40, 50});
+    cellBg->setOpacity(100);
+    this->addChild(cellBg);
+
     auto nameLabel = CCLabelBMFont::create(name.c_str(), "bigFont.fnt");
     nameLabel->setID("name-label");
-    nameLabel->limitLabelWidth(180.f, 0.9f, 0.5f);
+    nameLabel->limitLabelWidth(200.f, 0.85f, 0.5f);
+    nameLabel->setColor({230, 235, 245});
     
     auto menu = CCMenu::create();
     menu->setID("button-menu");
@@ -97,13 +152,14 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
             m_toggler = CCMenuItemToggler::createWithStandardSprites(
                 this,
                 menu_selector(SettingCell::onCheckboxToggled),
-                0.75f
+                0.8f
             );
             m_toggler->setID("toggler");
             m_toggler->toggle(gameManager->getGameVariable(gv.c_str()));
 
             auto infoSpr = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
-            infoSpr->setScale(0.65f);
+            infoSpr->setScale(0.7f);
+            infoSpr->setColor({180, 220, 255});
             auto infoBtn = CCMenuItemSpriteExtra::create(
                 infoSpr, this, menu_selector(SettingCell::onInfo)
             );
@@ -111,23 +167,27 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
             
             menu->addChild(infoBtn);
             menu->addChild(m_toggler);
-            menu->setLayout(RowLayout::create()->setGap(15.f)->setAxisAlignment(AxisAlignment::End));
+            menu->setLayout(RowLayout::create()->setGap(12.f)->setAxisAlignment(AxisAlignment::End));
             menu->updateLayout();
             break;
         }
         case FMODDebug: {
             auto debugBtn = CCMenuItemSpriteExtra::create(
-                ButtonSprite::create("Debug", "goldFont.fnt", "GJ_button_05.png", 0.6f),
+                ButtonSprite::create("Debug", "goldFont.fnt", "GJ_button_05.png", 0.7f),
                 this, 
                 menu_selector(SettingCell::onFMODDebug)
             );
             debugBtn->setID("debug-button");
+            if (debugBtn->getNormalImage()) {
+                debugBtn->getNormalImage()->setColor({255, 200, 100});
+            }
             menu->addChild(debugBtn);
             break;
         }
         case SongSelect: {
             auto songSpr = CCSprite::createWithSpriteFrameName("GJ_savedSongsBtn_001.png");
-            songSpr->setScale(0.5f);
+            songSpr->setScale(0.6f);
+            songSpr->setColor({150, 255, 150});
             auto songBtn = CCMenuItemSpriteExtra::create(
                 songSpr, this, menu_selector(SettingCell::onSongSelect)
             );
@@ -136,11 +196,16 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
             break;
         }
         case SongOffset: {
-            auto offsetInput = TextInput::create(80.f, "0");
+            auto offsetBg = CCScale9Sprite::create("square02_small.png");
+            offsetBg->setContentSize({90.f, 28.f});
+            offsetBg->setColor({60, 70, 85});
+            offsetBg->setOpacity(150);
+            
+            auto offsetInput = TextInput::create(85.f, "0");
             offsetInput->setCommonFilter(CommonFilter::Int);
             offsetInput->setMaxCharCount(6);
             offsetInput->setID("offset-input");
-            offsetInput->setScale(0.8f);
+            offsetInput->setScale(0.85f);
 
             if (gameManager->m_timeOffset != 0) {
                 offsetInput->setString(fmt::format("{}", gameManager->m_timeOffset));
@@ -156,27 +221,19 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
                 }
             });
             
-            menu->addChild(offsetInput);
-            break;
-        }
-        case Separator: {
-            nameLabel->setOpacity(0.f);
-            auto separatorText = CCLabelBMFont::create(name.c_str(), "goldFont.fnt");
-            separatorText->setID("separator-label");
-            separatorText->limitLabelWidth(320.f, 0.8f, 0.1f);
-            separatorText->setColor({255, 215, 0});
-            this->addChildAtPosition(separatorText, Anchor::Center);
+            auto offsetContainer = CCNode::create();
+            offsetContainer->addChild(offsetBg);
+            offsetContainer->addChild(offsetInput);
+            menu->addChild(offsetContainer);
             break;
         }
     }
 
-    if (type != Separator) {
-        this->addChildAtPosition(nameLabel, Anchor::Left, {15.f, 0.f});
-        this->addChildAtPosition(menu, Anchor::Right, {-20.f, 0.f});
-        nameLabel->setAnchorPoint({0.f, 0.5f});
-    }
+    this->addChildAtPosition(nameLabel, Anchor::Left, {20.f, 0.f});
+    this->addChildAtPosition(menu, Anchor::Right, {-20.f, 0.f});
+    nameLabel->setAnchorPoint({0.f, 0.5f});
 
-    this->setContentSize({380.f, 32.f});
+    this->setContentSize({400.f, 35.f});
     return true;
 }
 
@@ -199,67 +256,99 @@ void SettingCell::onCheckboxToggled(CCObject* sender) {
     bool newValue = !m_toggler->isOn();
     GameManager::get()->setGameVariable(m_gameVariable.c_str(), newValue);
     log::debug("Setting gv_{} to {}", m_gameVariable, newValue);
-
+    
     if (m_toggler) {
         m_toggler->stopAllActions();
-        auto scaleUp = CCScaleTo::create(0.1f, 0.9f);
-        auto scaleDown = CCScaleTo::create(0.1f, 0.75f);
-        auto sequence = CCSequence::create(scaleUp, scaleDown, nullptr);
-        m_toggler->runAction(sequence);
+        auto bounce = CCEaseElasticOut::create(CCScaleTo::create(0.3f, 0.8f));
+        auto fadeOut = CCFadeTo::create(0.1f, 180);
+        auto fadeIn = CCFadeTo::create(0.15f, 255);
+        auto fadeSeq = CCSequence::create(fadeOut, fadeIn, nullptr);
+        
+        m_toggler->runAction(bounce);
+        if (auto parent = this->getParent()) {
+            parent->runAction(fadeSeq);
+        }
     }
 }
 
-std::unordered_map<std::string, std::string> getSettingDescriptions() {
+std::unordered_map<std::string, std::string> getModernSettingDescriptions() {
     return {
-        {"0026", "Automatically restarts the level when you die, saving you a click."},
-        {"0052", "Reduces restart delay from 1.0s to 0.5s for faster gameplay."},
-        {"0128", "Locks and hides your cursor during gameplay for better focus."},
-        {"0010", "Swaps player 1 and player 2 controls in dual mode."},
-        {"0011", "Forces player 1 controls to one side even when dual mode is off."},
-        {"0028", "Prevents mouse movement when using controller thumbstick."},
-        {"0163", "Enables temporary keybinds: R for reset, Ctrl+R for full reset, P for hitboxes."},
-        {"0024", "Shows cursor and pause button while playing levels."},
-        {"0135", "Hides the attempt counter to reduce UI clutter."},
-        {"0015", "Moves the pause button to the opposite side of the screen."},
-        {"0129", "Removes extra visual indicators on portal objects."},
-        {"0130", "Adds helpful indicators to orb objects."},
-        {"0140", "Disables the scaling animation effect on all orbs."},
-        {"0141", "Disables scaling effect only on trigger orbs."},
-        {"0172", "Removes screen shake effects throughout the game."},
-        {"0014", "Prevents screen shake when your player dies."},
-        {"0072", "Removes the visual effect when gravity changes."},
-        {"0060", "Uses default icon appearance in mini mode."},
-        {"0061", "Changes spider teleport effect color between main and secondary."},
-        {"0062", "Changes dash orb fire effect color between main and secondary."},
-        {"0096", "Changes wave mode trail color between main and secondary."},
-        {"0174", "Hides debug text when using start positions or ignore damage."},
-        {"0071", "Hides checkpoint placement buttons in practice mode."},
-        {"0134", "Hides attempt counter specifically in practice mode."},
-        {"0027", "Automatically places checkpoints as you progress in practice."},
-        {"0068", "Places checkpoints more frequently in practice mode."},
-        {"0100", "Shows death effects even in practice mode."},
-        {"0125", "Plays normal level music in sync with editor levels."},
-        {"0166", "Displays hitboxes while in practice mode for debugging."},
-        {"0171", "Disables player hitbox when other hitboxes are shown."},
-        {"0066", "Increases rendering capacity for complex levels (may affect performance)."},
-        {"0108", "Automatically enables Low Detail Mode on supported levels."},
-        {"0082", "Removes warnings about levels with high object counts."},
-        {"0136", "Enhanced LDM that removes glow and enter effects."},
-        {"0042", "Increases local level storage from 10 to 100 levels."},
-        {"0119", "Faster saving but requires re-downloading levels each session."},
-        {"0127", "Saves gauntlet levels locally to avoid re-downloading."},
-        {"0155", "Disables anti-aliasing on shader effects for performance."},
-        {"0033", "Changes custom song storage location (may fix song issues)."},
-        {"0083", "Removes alerts when starting levels without downloaded songs."},
-        {"0018", "Prevents automatic deletion of custom songs."},
-        {"0142", "Reduces audio quality from 44.1kHz to 24kHz (restart required)."},
-        {"0159", "Increases audio buffer size to fix audio issues (restart required)."},
+        {"0026", "Instantly restarts levels on death without manual input"},
+        {"0052", "Reduces restart delay to 0.5 seconds for fluid gameplay"},
+        {"0128", "Hides cursor during gameplay for immersive experience"},
+        {"0010", "Reverses dual mode controls for alternative playstyle"},
+        {"0011", "Restricts player 1 to single-side controls permanently"},
+        {"0028", "Disables mouse input when using controller thumbstick"},
+        {"0163", "Enables developer hotkeys: R=reset, Ctrl+R=full reset, P=hitboxes"},
+        {"0024", "Displays cursor and pause controls during level play"},
+        {"0135", "Removes attempt counter from level interface"},
+        {"0015", "Relocates pause button to opposite screen position"},
+        {"0129", "Minimizes portal visual indicators for cleaner UI"},
+        {"0130", "Enhances orb visibility with additional indicators"},
+        {"0140", "Disables orb scaling animations for consistent visuals"},
+        {"0141", "Removes scaling effects from trigger orbs only"},
+        {"0172", "Eliminates all screen shake effects globally"},
+        {"0014", "Prevents death-triggered screen shake specifically"},
+        {"0072", "Removes gravity change visual feedback"},
+        {"0060", "Forces default icon appearance in mini gamemode"},
+        {"0061", "Alternates spider teleport colors between primary/secondary"},
+        {"0062", "Switches dash orb flame colors between primary/secondary"},
+        {"0096", "Changes wave trail colors between primary/secondary"},
+        {"0174", "Hides debug overlays during start position testing"},
+        {"0071", "Removes checkpoint UI elements in practice mode"},
+        {"0134", "Hides attempt tracking in practice sessions"},
+        {"0027", "Auto-generates checkpoints during practice gameplay"},
+        {"0068", "Increases checkpoint frequency in practice mode"},
+        {"0100", "Enables death animations in practice sessions"},
+        {"0125", "Synchronizes editor music with practice mode"},
+        {"0166", "Visualizes collision boundaries in practice mode"},
+        {"0171", "Disables player collision when showing hitboxes"},
+        {"0066", "Optimizes rendering for high-object-count levels"},
+        {"0108", "Automatically applies low detail mode when available"},
+        {"0082", "Suppresses high object count warning dialogs"},
+        {"0136", "Enhanced LDM removing glow and entrance effects"},
+        {"0042", "Expands local level storage from 10 to 100 slots"},
+        {"0119", "Accelerates save/load by clearing level cache"},
+        {"0127", "Caches gauntlet levels to prevent re-downloads"},
+        {"0155", "Disables shader anti-aliasing for performance"},
+        {"0033", "Relocates custom song directory for compatibility"},
+        {"0083", "Bypasses missing song download notifications"},
+        {"0018", "Prevents automatic custom song cleanup"},
+        {"0142", "Reduces audio sample rate to 24kHz (restart required)"},
+        {"0159", "Increases audio buffer for stability (restart required)"},
+        {"0094", "Expands comment display capacity per page"},
+        {"0090", "Preloads comments without manual refresh"},
+        {"0073", "Uses 2.1 completion criteria for level filtering"},
+        {"0093", "Doubles level list capacity from 10 to 20 items"},
+        {"0084", "Positions new levels at list bottom by default"},
+        {"0126", "Shows precise decimal percentages instead of integers"},
+        {"0099", "Displays personal leaderboard rankings on levels"},
+        {"0095", "Legacy option with no functional effect"},
+        {"0167", "Adds confirmation dialog before level exit"},
+        {"0168", "Accelerates menu transition animations"},
+        {"0040", "Toggles percentage display during gameplay"},
+        {"0074", "Controls restart button visibility in pause menu"},
+        {"0109", "Shows additional debug information overlay"},
+        {"0113", "Inverts platformer movement controls"},
+        {"0153", "Enables player explosion effects on death"},
+        {"0019", "Preloads audio files into system memory"},
+        {"0022", "Increases audio quality above standard settings"},
+        {"0075", "Parental control: disables all comment systems"},
+        {"0076", "Parental control: blocks account post features"},
+        {"0077", "Parental control: removes creator search functionality"},
+        {"0023", "Applies frame rate smoothing algorithms"},
+        {"0065", "Optimizes object movement calculations"},
+        {"0101", "Forces smooth fix activation regardless of settings"},
+        {"0102", "Enables editor-specific smooth fix processing"},
+        {"0056", "Suppresses high object count alerts"},
+        {"0081", "Disables physics-based screen shake effects"},
+        {"0067", "Improves start position placement accuracy"},
     };
 }
 
 void SettingCell::onInfo(CCObject* sender) {
-    auto descriptions = getSettingDescriptions();
-    std::string description = "No description available for this setting.";
+    auto descriptions = getModernSettingDescriptions();
+    std::string description = "This setting modifies game behavior. No detailed description available.";
     
     if (descriptions.find(m_gameVariable) != descriptions.end()) {
         description = descriptions[m_gameVariable];
@@ -270,13 +359,15 @@ void SettingCell::onInfo(CCObject* sender) {
         description.c_str(),
         "OK"
     );
-    alert->m_scene = CCScene::get();
-    alert->show();
+    if (alert) {
+        alert->m_scene = CCScene::get();
+        alert->show();
+    }
 }
 
 SettingsLayer* SettingsLayer::create() {
     auto ret = new SettingsLayer();
-    if (ret && ret->initAnchored(520.f, 300.f)) {
+    if (ret && ret->initAnchored(560.f, 340.f)) {
         ret->autorelease();
         return ret;
     }
@@ -284,25 +375,30 @@ SettingsLayer* SettingsLayer::create() {
     return nullptr;
 }
 
-CCSprite* createCategoryBtnSprite(std::string name, bool isSelected = false) {
+CCSprite* createModernCategorySprite(const std::string& name, bool isSelected = false) {
     auto sprite = CCSprite::createWithSpriteFrameName(
         isSelected ? "GJ_longBtn02_001.png" : "GJ_longBtn01_001.png"
     );
-    auto text = CCLabelBMFont::create(name.c_str(), "bigFont.fnt");
-    text->limitLabelWidth(85.f, 0.75f, 0.1f);
-    sprite->setScale(0.9f);
-    sprite->addChildAtPosition(text, Anchor::Center, {0, 1.5f});
-
+    
     if (isSelected) {
-        text->setColor({255, 255, 150});
+        sprite->setColor({100, 150, 255});
+    } else {
+        sprite->setColor({80, 90, 110});
     }
+    
+    auto text = CCLabelBMFont::create(name.c_str(), "bigFont.fnt");
+    text->limitLabelWidth(90.f, 0.8f, 0.1f);
+    text->setColor(isSelected ? ccc3(255, 255, 255) : ccc3(200, 210, 230));
+    
+    sprite->setScale(0.95f);
+    sprite->addChildAtPosition(text, Anchor::Center, {0, 2.f});
     
     return sprite;
 }
 
-CCMenuItemSpriteExtra* createCategoryBtn(std::string name, CCObject* target, SettingPage page, SEL_MenuHandler callback) {
+CCMenuItemSpriteExtra* createModernCategoryBtn(const std::string& name, CCObject* target, SettingPage page, SEL_MenuHandler callback) {
     auto btn = CCMenuItemSpriteExtra::create(
-        createCategoryBtnSprite(name), target, callback
+        createModernCategorySprite(name), target, callback
     );
     btn->setUserObject(CCInteger::create(page));
     btn->setID(name);
@@ -311,24 +407,33 @@ CCMenuItemSpriteExtra* createCategoryBtn(std::string name, CCObject* target, Set
 
 bool SettingsLayer::setup() {
     this->setID("SettingsLayer"_spr);
-    this->setTitle("Advanced Settings");
-    this->m_bgSprite->setID("background");
-    this->m_buttonMenu->setID("button-menu");
-    this->m_mainLayer->setID("main-layer");
-    this->m_closeBtn->setID("close-button");
+    this->setTitle("Advanced Settings Panel");
+    
+    if (m_bgSprite) {
+        m_bgSprite->setID("background");
+        m_bgSprite->setColor({20, 25, 35});
+    }
+    if (m_buttonMenu) m_buttonMenu->setID("button-menu");
+    if (m_mainLayer) m_mainLayer->setID("main-layer");
+    if (m_closeBtn) m_closeBtn->setID("close-button");
+    if (m_title) {
+        m_title->setColor({220, 230, 255});
+        m_title->setScale(1.1f);
+    }
+    
     m_noElasticity = true;
 
     auto tabBg = CCScale9Sprite::create("square02b_001.png");
     tabBg->setID("tab-background");
-    tabBg->setContentSize({110.f, 260.f});
-    tabBg->setColor({20, 20, 25});
-    tabBg->setOpacity(180);
+    tabBg->setContentSize({120.f, 280.f});
+    tabBg->setColor({15, 20, 30});
+    tabBg->setOpacity(200);
 
     auto tabMenu = CCMenu::create();
     tabMenu->setID("tab-menu");
 
     #define CATEGORY_BTN(name, page) tabMenu->addChild( \
-        createCategoryBtn(name, this, page, menu_selector(SettingsLayer::onCategoryBtn)) \
+        createModernCategoryBtn(name, this, page, menu_selector(SettingsLayer::onCategoryBtn)) \
     );
     
     CATEGORY_BTN("Gameplay", SettingPage::Gameplay)
@@ -341,26 +446,37 @@ bool SettingsLayer::setup() {
     tabMenu->setLayout(
         ColumnLayout::create()
             ->setAxisAlignment(AxisAlignment::Even)
-            ->setGap(5.f)
+            ->setGap(8.f)
     );
     tabMenu->setContentSize(tabBg->getContentSize());
     tabMenu->updateLayout();
     tabBg->addChildAtPosition(tabMenu, Anchor::Center);
 
-    m_mainLayer->addChildAtPosition(tabBg, Anchor::Left, {75.f, 0.f});
+    m_mainLayer->addChildAtPosition(tabBg, Anchor::Left, {80.f, 0.f});
 
     switchPage(SettingPage::Gameplay, true, 
         static_cast<CCMenuItemSpriteExtra*>(this->getChildByIDRecursive("Gameplay")));
 
+    auto searchContainer = CCNode::create();
+    searchContainer->setID("search-container");
+    
+    auto searchBg = CCScale9Sprite::create("square02_small.png");
+    searchBg->setContentSize({80.f, 35.f});
+    searchBg->setColor({40, 50, 65});
+    searchBg->setOpacity(150);
+    searchContainer->addChild(searchBg);
+
     auto searchBtnSpr = CCSprite::createWithSpriteFrameName("gj_findBtn_001.png");
-    searchBtnSpr->setScale(0.9f);
+    searchBtnSpr->setScale(0.85f);
+    searchBtnSpr->setColor({150, 200, 255});
     auto searchBtn = CCMenuItemSpriteExtra::create(
         searchBtnSpr, this, menu_selector(SettingsLayer::onSearchBtn)
     );
     searchBtn->setID("search-button");
 
     auto clearBtnSpr = CCSprite::createWithSpriteFrameName("gj_findBtnOff_001.png");
-    clearBtnSpr->setScale(0.9f);
+    clearBtnSpr->setScale(0.85f);
+    clearBtnSpr->setColor({255, 150, 120});
     m_searchClearBtn = CCMenuItemSpriteExtra::create(
         clearBtnSpr, this, menu_selector(SettingsLayer::onClearSearch)
     );
@@ -370,11 +486,11 @@ bool SettingsLayer::setup() {
     auto searchMenu = CCMenu::create();
     searchMenu->addChild(searchBtn);
     searchMenu->addChild(m_searchClearBtn);
-    searchMenu->setLayout(RowLayout::create()->setGap(5.f));
+    searchMenu->setLayout(RowLayout::create()->setGap(6.f));
     searchMenu->updateLayout();
-    searchMenu->setID("search-menu");
+    searchContainer->addChild(searchMenu);
     
-    m_mainLayer->addChildAtPosition(searchMenu, Anchor::TopRight, {-15.f, -15.f});
+    m_mainLayer->addChildAtPosition(searchContainer, Anchor::TopRight, {-25.f, -20.f});
 
     return true;
 }
@@ -406,7 +522,7 @@ void SettingsLayer::performSearch(std::string query) {
     );
     
     auto allSettings = CCArray::create();
-
+    
     for (int i = 0; i < 6; i++) {
         switchPage(static_cast<SettingPage>(i), false, m_currentBtn);
         for (auto cell : CCArrayExt<SettingCell*>(m_listItems)) {
@@ -415,7 +531,7 @@ void SettingsLayer::performSearch(std::string query) {
             }
         }
     }
-
+    
     auto filteredSettings = CCArray::create();
     std::string lowerQuery = toLower(query);
     
@@ -463,15 +579,16 @@ void SettingsLayer::switchPage(SettingPage page, bool isFirstRun, CCMenuItemSpri
 
     switch (page) {
         case Gameplay:
-            SEPARATOR("Basic Controls")
+            SEPARATOR("Core Mechanics")
             SETTING("Auto Retry", "0026")
             SETTING("Fast Reset", "0052")
-            SETTING("Show Cursor In-Game", "0024")
             SETTING("Show Percent", "0040")
             SETTING("Restart Button", "0074")
             SETTING("Confirm Exit", "0167")
+            SETTING("Extra Info", "0109")
             
-            SEPARATOR("Advanced Controls")
+            SEPARATOR("Control Systems")
+            SETTING("Show Cursor In-Game", "0024")
             SETTING("Flip 2P Controls", "0010")
             SETTING("Always Limit Controls", "0011")
             SETTING("Disable Thumbstick", "0028")
@@ -479,22 +596,62 @@ void SettingsLayer::switchPage(SettingPage page, bool isFirstRun, CCMenuItemSpri
             SETTING("Quick Keys", "0163")
             SETTING("Flip Pause Button", "0015")
             
-            SEPARATOR("Visual Options")
+            SEPARATOR("Visual Interface")
             SETTING("Decimal Percent", "0126")
             SETTING("Hide Attempts", "0135")
-            SETTING("Extra Info", "0109")
             SETTING("Orb Labels", "0130")
             SETTING("Hide Playtest Text", "0174")
             
-            SEPARATOR("Player Appearance")
+            SEPARATOR("Player Visuals")
             SETTING("Explode Player on Death", "0153")
             SETTING("Default Mini Icon", "0060")
             SETTING("Switch Spider Teleport Color", "0061")
             SETTING("Switch Dash Fire Color", "0062")
             SETTING("Switch Wave Trail Color", "0096")
             break;
-
-        
+            
+        case Practice:
+            SEPARATOR("Checkpoint System")
+            SETTING("Auto Checkpoints", "0027")
+            SETTING("Quick Checkpoint Mode", "0068")
+            SETTING("High Start Position Accuracy", "0067")
+            
+            SEPARATOR("Practice Interface")
+            SETTING("Hide Practice Button", "0071")
+            SETTING("Hide Attempts in Practice", "0134")
+            SETTING("Practice Death Effect", "0100")
+            SETTING("Show Hitboxes", "0166")
+            SETTING("Disable Player Hitbox", "0171")
+            break;
+            
+        case Performance:
+            SEPARATOR("Rendering Optimization")
+            SETTING("Smooth Fix", "0023")
+            SETTING("Move Optimization", "0065")
+            SETTING("Force Smooth Fix", "0101")
+            SETTING("Smooth Fix in Editor", "0102")
+            SETTING("High Capacity Mode", "0066")
+            
+            SEPARATOR("Low Detail Mode")
+            SETTING("Auto LDM", "0108")
+            SETTING("Extra LDM", "0136")
+            SETTING("Disable Shader Anti-Aliasing", "0155")
+            
+            SEPARATOR("System Enhancement")
+            SETTING("Increase Max Levels", "0042")
+            SETTING("Save Gauntlet Levels", "0127")
+            SETTING("Increase Local Levels Per Page", "0093")
+            SETTING("Lock Cursor In-Game", "0128")
+            
+            SEPARATOR("Effect Toggles")
+            SETTING("Disable Explosion Shake", "0014")
+            SETTING("Disable Orb Scale", "0140")
+            SETTING("Disable Trigger Orb Scale", "0141")
+            SETTING("Disable Shake Effect", "0081")
+            SETTING("Disable High Object Alert", "0082")
+            SETTING("Disable Object Alert", "0056")
+            break;
+            
         case Audio:
             SEPARATOR("Audio Quality")
             SETTING("Higher Audio Quality", "0022")
@@ -505,6 +662,7 @@ void SettingsLayer::switchPage(SettingPage page, bool isFirstRun, CCMenuItemSpri
             SETTING("Load Songs into Memory", "0019")
             SETTING("Change Song Path", "0033")
             SETTING("No Song Limit", "0018")
+            SETTING("Disable Song Alert", "0083")
             SETTING("Normal Music in Editor", "0125")
             
             SEPARATOR("Audio Tools")
@@ -513,8 +671,34 @@ void SettingsLayer::switchPage(SettingPage page, bool isFirstRun, CCMenuItemSpri
             SETTING_WITH_TYPE("Song Offset (MS)", SettingCellType::SongOffset)
             break;
             
-        default:
-            SEPARATOR("Coming Soon!")
+        case Misc:
+            SEPARATOR("User Interface")
+            SETTING("Fast Menu", "0168")
+            SETTING("Show Leaderboard Percent", "0099")
+            SETTING("Manual Level Order", "0084")
+            SETTING("New Completed Filter", "0073")
+            SETTING("Do Not...", "0095")
+            
+            SEPARATOR("Comments System")
+            SETTING("Autoload Comments", "0090")
+            SETTING("More Comments Mode", "0094")
+            
+            SEPARATOR("Parental Controls")
+            SETTING("Disable Comments", "0075")
+            SETTING("Disable Account Comments", "0076")
+            SETTING("Featured Levels Only", "0077")
+            
+            SEPARATOR("Visual Effects")
+            SETTING("Disable Gravity Effect", "0072")
+            break;
+            
+        case Keybinds:
+            #ifndef GEODE_IS_IOS
+            auto mol = MoreOptionsLayer::create();
+            mol->onKeybindings(btn);
+            #endif
+            SEPARATOR("Keybind Configuration")
+            SEPARATOR("Use the Options menu for full keybind customization")
             break;
     }
     
@@ -525,26 +709,43 @@ void SettingsLayer::switchPage(SettingPage page, bool isFirstRun, CCMenuItemSpri
     refreshList();
     
     if (m_currentBtn) {
-        m_currentBtn->setSprite(createCategoryBtnSprite(m_currentBtn->getID(), false));
+        m_currentBtn->setSprite(createModernCategorySprite(m_currentBtn->getID(), false));
     }
     if (btn) {
-        btn->setSprite(createCategoryBtnSprite(btn->getID(), true));
+        btn->setSprite(createModernCategorySprite(btn->getID(), true));
         m_currentBtn = btn;
     }
 }
 
 void SettingsLayer::refreshList() {
-    auto listView = ListView::create(m_listItems, 32.f, 380.f, 260.f);
+    auto listView = ListView::create(m_listItems, 35.f, 420.f, 280.f);
     listView->setID("list-view");
     
-    m_border = Border::create(listView, {30, 30, 35, 200}, {380.f, 260.f});
+    if (listView->m_tableView) {
+        listView->m_tableView->setID("table-view");
+        if (listView->m_tableView->m_contentLayer) {
+            listView->m_tableView->m_contentLayer->setID("content-layer");
+        }
+    }
+    
+    m_border = Border::create(listView, {25, 30, 40, 220}, {420.f, 280.f});
     m_border->setID("list-border");
+    
     if (auto borderSprite = typeinfo_cast<CCScale9Sprite*>(
         m_border->getChildByID("geode.loader/border_sprite"))) {
-        borderSprite->setColor({40, 40, 50});
-        borderSprite->setOpacity(150);
+        borderSprite->setColor({30, 35, 45});
+        borderSprite->setOpacity(180);
+        
+        auto glowEffect = CCScale9Sprite::create("square02_small.png");
+        glowEffect->setContentSize({borderSprite->getContentSize().width + 4.f, 
+                                   borderSprite->getContentSize().height + 4.f});
+        glowEffect->setColor({100, 150, 255});
+        glowEffect->setOpacity(30);
+        glowEffect->setPosition(borderSprite->getPosition());
+        glowEffect->setZOrder(-1);
+        m_border->addChild(glowEffect);
     }
     
     m_border->ignoreAnchorPointForPosition(false);
-    m_mainLayer->addChildAtPosition(m_border, Anchor::Right, {-190.f, 0.f});
+    m_mainLayer->addChildAtPosition(m_border, Anchor::Right, {-210.f, 0.f});
 }
