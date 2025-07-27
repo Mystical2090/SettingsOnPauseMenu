@@ -42,9 +42,6 @@ bool SearchPopup::setup(SearchCB callback) {
     m_input = TextInput::create(210.f, "Type to search...");
     m_input->setID("search-input");
     m_input->setMaxCharCount(64);
-    if (m_input->getInputNode()) {
-        m_input->getInputNode()->setColor({240, 240, 240});
-    }
     inputContainer->addChild(m_input);
     
     m_mainLayer->addChildAtPosition(inputContainer, Anchor::Center, {0, 20.f});
@@ -58,9 +55,6 @@ bool SearchPopup::setup(SearchCB callback) {
         menu_selector(SearchPopup::onSearch)
     );
     searchBtn->setID("search-button");
-    if (searchBtn->getNormalImage()) {
-        searchBtn->getNormalImage()->setColor({100, 200, 255});
-    }
 
     auto clearBtn = CCMenuItemSpriteExtra::create(
         ButtonSprite::create("Clear", "goldFont.fnt", "GJ_button_02.png", 0.9f),
@@ -68,9 +62,6 @@ bool SearchPopup::setup(SearchCB callback) {
         menu_selector(SearchPopup::onClear)
     );
     clearBtn->setID("clear-button");
-    if (clearBtn->getNormalImage()) {
-        clearBtn->getNormalImage()->setColor({255, 150, 100});
-    }
 
     buttonMenu->addChild(searchBtn);
     buttonMenu->addChild(clearBtn);
@@ -114,29 +105,6 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
     m_gameVariable = gv;
     m_type = type;
 
-    if (type == Separator) {
-        auto separatorBg = CCScale9Sprite::create("square02b_001.png");
-        separatorBg->setContentSize({400.f, 28.f});
-        separatorBg->setColor({20, 25, 35});
-        separatorBg->setOpacity(120);
-        this->addChild(separatorBg);
-        
-        auto separatorText = CCLabelBMFont::create(name.c_str(), "goldFont.fnt");
-        separatorText->setID("separator-label");
-        separatorText->limitLabelWidth(350.f, 0.8f, 0.1f);
-        separatorText->setColor({255, 215, 100});
-        this->addChildAtPosition(separatorText, Anchor::Center);
-        
-        this->setContentSize({400.f, 28.f});
-        return true;
-    }
-
-    auto cellBg = CCScale9Sprite::create("square02b_small.png");
-    cellBg->setContentSize({400.f, 35.f});
-    cellBg->setColor({35, 40, 50});
-    cellBg->setOpacity(100);
-    this->addChild(cellBg);
-
     auto nameLabel = CCLabelBMFont::create(name.c_str(), "bigFont.fnt");
     nameLabel->setID("name-label");
     nameLabel->limitLabelWidth(200.f, 0.85f, 0.5f);
@@ -148,6 +116,22 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
     auto gameManager = GameManager::sharedState();
 
     switch (type) {
+        case Separator: {
+            auto separatorBg = CCScale9Sprite::create("square02b_001.png");
+            separatorBg->setContentSize({400.f, 28.f});
+            separatorBg->setColor({20, 25, 35});
+            separatorBg->setOpacity(120);
+            this->addChild(separatorBg);
+            
+            auto separatorText = CCLabelBMFont::create(name.c_str(), "goldFont.fnt");
+            separatorText->setID("separator-label");
+            separatorText->limitLabelWidth(350.f, 0.8f, 0.1f);
+            separatorText->setColor({255, 215, 100});
+            this->addChildAtPosition(separatorText, Anchor::Center);
+            
+            this->setContentSize({400.f, 28.f});
+            return true;
+        }
         case Default: {
             m_toggler = CCMenuItemToggler::createWithStandardSprites(
                 this,
@@ -178,9 +162,6 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
                 menu_selector(SettingCell::onFMODDebug)
             );
             debugBtn->setID("debug-button");
-            if (debugBtn->getNormalImage()) {
-                debugBtn->getNormalImage()->setColor({255, 200, 100});
-            }
             menu->addChild(debugBtn);
             break;
         }
@@ -229,11 +210,19 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
         }
     }
 
-    this->addChildAtPosition(nameLabel, Anchor::Left, {20.f, 0.f});
-    this->addChildAtPosition(menu, Anchor::Right, {-20.f, 0.f});
-    nameLabel->setAnchorPoint({0.f, 0.5f});
+    if (type != Separator) {
+        auto cellBg = CCScale9Sprite::create("square02b_small.png");
+        cellBg->setContentSize({400.f, 35.f});
+        cellBg->setColor({35, 40, 50});
+        cellBg->setOpacity(100);
+        this->addChild(cellBg);
+        
+        this->addChildAtPosition(nameLabel, Anchor::Left, {20.f, 0.f});
+        this->addChildAtPosition(menu, Anchor::Right, {-20.f, 0.f});
+        nameLabel->setAnchorPoint({0.f, 0.5f});
+        this->setContentSize({400.f, 35.f});
+    }
 
-    this->setContentSize({400.f, 35.f});
     return true;
 }
 
