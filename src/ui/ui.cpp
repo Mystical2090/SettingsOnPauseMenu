@@ -107,7 +107,7 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
 
     auto nameLabel = CCLabelBMFont::create(name.c_str(), "bigFont.fnt");
     nameLabel->setID("name-label");
-    nameLabel->limitLabelWidth(220.f, 0.8f, 0.5f);
+    nameLabel->limitLabelWidth(320.f, 0.85f, 0.5f);
     nameLabel->setColor({230, 235, 245});
     
     auto menu = CCMenu::create();
@@ -118,18 +118,18 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
     switch (type) {
         case Separator: {
             auto separatorBg = CCScale9Sprite::create("square02b_001.png");
-            separatorBg->setContentSize({360.f, 28.f});
+            separatorBg->setContentSize({480.f, 32.f});
             separatorBg->setColor({20, 25, 35});
             separatorBg->setOpacity(120);
             this->addChild(separatorBg);
             
             auto separatorText = CCLabelBMFont::create(name.c_str(), "goldFont.fnt");
             separatorText->setID("separator-label");
-            separatorText->limitLabelWidth(320.f, 0.8f, 0.1f);
+            separatorText->limitLabelWidth(440.f, 0.9f, 0.1f);
             separatorText->setColor({255, 215, 100});
             this->addChildAtPosition(separatorText, Anchor::Center);
             
-            this->setContentSize({360.f, 28.f});
+            this->setContentSize({480.f, 32.f});
             return true;
         }
         case Default: {
@@ -212,15 +212,15 @@ bool SettingCell::init(std::string name, std::string gv, SettingCellType type) {
 
     if (type != Separator) {
         auto cellBg = CCScale9Sprite::create("square02b_small.png");
-        cellBg->setContentSize({360.f, 35.f});
+        cellBg->setContentSize({480.f, 40.f});
         cellBg->setColor({35, 40, 50});
         cellBg->setOpacity(100);
         this->addChild(cellBg);
         
-        this->addChildAtPosition(nameLabel, Anchor::Left, {20.f, 0.f});
-        this->addChildAtPosition(menu, Anchor::Right, {-20.f, 0.f});
+        this->addChildAtPosition(nameLabel, Anchor::Left, {25.f, 0.f});
+        this->addChildAtPosition(menu, Anchor::Right, {-25.f, 0.f});
         nameLabel->setAnchorPoint({0.f, 0.5f});
-        this->setContentSize({360.f, 35.f});
+        this->setContentSize({480.f, 40.f});
     }
 
     return true;
@@ -356,7 +356,7 @@ void SettingCell::onInfo(CCObject* sender) {
 
 SettingsLayer* SettingsLayer::create() {
     auto ret = new SettingsLayer();
-    if (ret && ret->initAnchored(560.f, 340.f)) {
+    if (ret && ret->initAnchored(680.f, 420.f)) {
         ret->autorelease();
         return ret;
     }
@@ -376,10 +376,10 @@ CCSprite* createModernCategorySprite(const std::string& name, bool isSelected = 
     }
     
     auto text = CCLabelBMFont::create(name.c_str(), "bigFont.fnt");
-    text->limitLabelWidth(100.f, 0.75f, 0.1f);
+    text->limitLabelWidth(120.f, 0.8f, 0.1f);
     text->setColor(isSelected ? ccc3(255, 255, 255) : ccc3(200, 210, 230));
     
-    sprite->setScale(1.0f);
+    sprite->setScale(1.1f);
     sprite->addChildAtPosition(text, Anchor::Center, {0, 2.f});
     
     return sprite;
@@ -391,7 +391,7 @@ CCMenuItemSpriteExtra* createModernCategoryBtn(const std::string& name, CCObject
     );
     btn->setUserObject(CCInteger::create(page));
     btn->setID(name);
-    btn->setContentSize({110.f, 40.f});
+    btn->setContentSize({130.f, 45.f});
     return btn;
 }
 
@@ -415,7 +415,7 @@ bool SettingsLayer::setup() {
 
     auto tabBg = CCScale9Sprite::create("square02b_001.png");
     tabBg->setID("tab-background");
-    tabBg->setContentSize({140.f, 300.f});
+    tabBg->setContentSize({160.f, 360.f});
     tabBg->setColor({15, 20, 30});
     tabBg->setOpacity(200);
 
@@ -436,13 +436,13 @@ bool SettingsLayer::setup() {
     tabMenu->setLayout(
         ColumnLayout::create()
             ->setAxisAlignment(AxisAlignment::Even)
-            ->setGap(12.f)
+            ->setGap(15.f)
     );
-    tabMenu->setContentSize({120.f, 280.f});
+    tabMenu->setContentSize({140.f, 340.f});
     tabMenu->updateLayout();
     tabBg->addChildAtPosition(tabMenu, Anchor::Center);
 
-    m_mainLayer->addChildAtPosition(tabBg, Anchor::Left, {90.f, 0.f});
+    m_mainLayer->addChildAtPosition(tabBg, Anchor::Left, {100.f, 0.f});
 
     switchPage(SettingPage::Gameplay, true, 
         static_cast<CCMenuItemSpriteExtra*>(this->getChildByIDRecursive("Gameplay")));
@@ -480,7 +480,7 @@ bool SettingsLayer::setup() {
     searchMenu->updateLayout();
     searchContainer->addChild(searchMenu);
     
-    m_mainLayer->addChildAtPosition(searchContainer, Anchor::TopRight, {-60.f, -25.f});
+    m_mainLayer->addChildAtPosition(searchContainer, Anchor::TopRight, {-80.f, -30.f});
 
     return true;
 }
@@ -708,7 +708,7 @@ void SettingsLayer::switchPage(SettingPage page, bool isFirstRun, CCMenuItemSpri
 }
 
 void SettingsLayer::refreshList() {
-    auto listView = ListView::create(m_listItems, 35.f, 380.f, 260.f);
+    auto listView = ListView::create(m_listItems, 40.f, 500.f, 340.f);
     listView->setID("list-view");
     
     if (listView->m_tableView) {
@@ -718,7 +718,7 @@ void SettingsLayer::refreshList() {
         }
     }
     
-    m_border = Border::create(listView, {25, 30, 40, 220}, {380.f, 260.f});
+    m_border = Border::create(listView, {25, 30, 40, 220}, {500.f, 340.f});
     m_border->setID("list-border");
     
     if (auto borderSprite = typeinfo_cast<CCScale9Sprite*>(
@@ -737,5 +737,5 @@ void SettingsLayer::refreshList() {
     }
     
     m_border->ignoreAnchorPointForPosition(false);
-    m_mainLayer->addChildAtPosition(m_border, Anchor::Right, {-180.f, 0.f});
+    m_mainLayer->addChildAtPosition(m_border, Anchor::Right, {-170.f, 0.f});
 }
