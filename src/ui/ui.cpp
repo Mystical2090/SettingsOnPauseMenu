@@ -1,4 +1,4 @@
-#include "./SettingsLayer.hpp"
+#include "ui.hpp"
 
 SearchPopup* SearchPopup::create(SearchCB callback) {
     auto ret = new SearchPopup();
