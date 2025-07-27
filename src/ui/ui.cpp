@@ -248,6 +248,7 @@ std::string descForGV(std::string gv) {
         {"0102", "Toggles smooth fix in the editor"},
         {"0056", "Disables the high object alert"},
         {"0081", "Disables the shake effect in levels"},
+	{"99999", "Features and Everything"},
         {"0067", "Increases the accuracy of start positions"},
     };
 
@@ -320,6 +321,7 @@ bool SettingsLayer::setup() {
     CATEGORY_BTN("Audio", SettingPage::Audio)
     CATEGORY_BTN("Misc", SettingPage::Misc)
     CATEGORY_BTN("Keys", SettingPage::Keybinds)
+    CATEGORY_BTN("Credits", SettingPage::Credits)
 
     menu->setLayout(
         ColumnLayout::create()
@@ -524,6 +526,8 @@ void SettingsLayer::switchPage(SettingPage page, bool isFirstRun, CCMenuItemSpri
             SETTING("Practice Death Effect", "0100")
             SETTING("Hide Attempts in Practice", "0134")
             break;
+	 case Credits:
+	   SETTING("Mystical433", "99999")
         case Keybinds:
             #ifndef GEODE_IS_IOS
 // this should work but like for ios you dont need keybinds so
